@@ -2,15 +2,19 @@
 Уровни доступа
 """
 
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
-class IsOwner(BasePermission):
+class IsOwnerOrReadOnly(BasePermission):
     """
-    Разрешает доступ только владельцу объекта
+    Разрешает безопасные методы (GET, HEAD, OPTIONS) всем,
+    а модифицирующие методы (POST, PATCH, DELETE) только владельцу.
     """
 
     def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        
         if hasattr(obj, "creator"):
             return obj.creator == request.user
         if hasattr(obj, "author"):

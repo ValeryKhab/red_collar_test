@@ -10,7 +10,10 @@ from rest_framework.permissions import IsAuthenticated
 
 from .serializers import PointSerializer, MessageSerializer
 from .models import Point, Message
-from .permissions import IsOwner
+from .permissions import IsOwnerOrReadOnly
+
+
+AVERAGE_EARTH_RADIUS = 6371
 
 
 class PointListCreateView(ListCreateAPIView):
@@ -34,14 +37,14 @@ class MessageListCreateView(ListCreateAPIView):
 
 class PointRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     serializer_class = PointSerializer
-    permission_classes = [IsOwner, IsAuthenticated]
+    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
     queryset = Point.objects.all()
     lookup_field = "id"
     
     
 class MessageRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     serializer_class = MessageSerializer
-    permission_classes = [IsOwner, IsAuthenticated]
+    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
     queryset = Message.objects.all()
     lookup_field = "id"
 
@@ -66,7 +69,7 @@ class PointSearchView(GenericAPIView):
             dlat = lat2 - lat1
             dlon = lon2 - lon1
             a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-            return 6371 * (2 * asin(sqrt(a)))
+            return AVERAGE_EARTH_RADIUS * (2 * asin(sqrt(a)))
 
         points_in_radius = []
         for point in Point.objects.prefetch_related("message_set"):
