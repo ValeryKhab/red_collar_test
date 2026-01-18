@@ -27,7 +27,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         password: Пароль
     """
 
-    password = serializers.CharField(write_only=True, min_length=6)
+    password = serializers.CharField(write_only=True, min_length=6, style={"input_type": "password"})
 
     class Meta:
         model = User
@@ -47,4 +47,4 @@ class LoginSerializer(serializers.Serializer):
     """
 
     username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, style={"input_type": "password"})
