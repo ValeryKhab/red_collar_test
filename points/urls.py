@@ -3,8 +3,13 @@ URL-шаблоны
 """
 
 from django.urls import path
-from .views import (PointListCreateView, MessageListCreateView, PointRetrieveUpdateDestroyView, 
-                    MessageRetrieveUpdateDestroyView, PointSearchView)
+from .views import (
+    PointListCreateView,
+    MessageListCreateView,
+    PointRetrieveUpdateDestroyView,
+    MessageRetrieveUpdateDestroyView,
+    PointSearchView,
+)
 
 urlpatterns = [
     path("", PointListCreateView.as_view()),

@@ -7,6 +7,17 @@ from .models import Point, Message
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор модели сообщения
+
+    Fields:
+        id: ID сообщения
+        text: Текст сообщения
+        author: Автор сообщения
+        created_at: Дата создания сообщения
+        updated_at: Дата последнего изменения сообщения
+    """
+
     author = serializers.ReadOnlyField(source="author.username")
 
     class Meta:
@@ -16,9 +27,23 @@ class MessageSerializer(serializers.ModelSerializer):
 
 
 class PointSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор модели гео-точки
+
+    Fields:
+        messages: Сообщения на точке
+        name: Название точки
+        description: Описание точки
+        latitude: Широта
+        longitude: Долгота
+        creator: Создатель точки
+        created_at: Дата создания точки
+        updated_at: Дата последнего изменения точки
+    """
+
     creator = serializers.ReadOnlyField(source="creator.username")
-    messages_сount = MessageSerializer(many=True, read_only=True, source="message_set")
-    
+    messages = MessageSerializer(many=True, read_only=True, source="message_set")
+
     class Meta:
         model = Point
         fields = "__all__"

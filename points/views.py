@@ -3,8 +3,16 @@
 """
 
 from math import radians, cos, sin, asin, sqrt
-from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from typing import Any
+
+from django.db.models import QuerySet
+from rest_framework.generics import (
+    GenericAPIView,
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 from rest_framework.response import Response
+from rest_framework.request import Request
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
@@ -13,36 +21,69 @@ from .models import Point, Message
 from .permissions import IsOwnerOrReadOnly
 
 
-AVERAGE_EARTH_RADIUS = 6371
+AVERAGE_EARTH_RADIUS: int = 6371  # средний радиус Земли в километрах
 
 
 class PointListCreateView(ListCreateAPIView):
+    """
+    Представление для создания точки и просмотра существующих
+    """
+
     serializer_class = PointSerializer
     queryset = Point.objects.all()
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: PointSerializer) -> None:
+        """
+        Создане новой гео-точки и привязка к текущему пользователю
+
+        Args:
+            serializer: Сериализатор гео-точки
+        """
         serializer.save(creator=self.request.user)
 
 
 class MessageListCreateView(ListCreateAPIView):
+    """Создание сообщений и получение сообщений для конкретной точки"""
+
     serializer_class = MessageSerializer
-    
-    def get_queryset(self):
+
+    def get_queryset(self) -> QuerySet[Message]:
+        """
+        Возвращает список сообщений, относящихся к заданной точке
+
+        Returns:
+            QuerySet сообщений
+        """
+
         return Message.objects.filter(point_id=self.kwargs["point_id"])
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: MessageSerializer) -> None:
+        """
+        Создаёт сообщение для указанной гео-точки
+
+        Args:
+            serializer: Сериализатор сообщения
+        """
         point = Point.objects.get(id=self.kwargs["point_id"])
         serializer.save(author=self.request.user, point=point)
 
 
 class PointRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    """
+    Получение, обновление и удаление гео-точки
+    """
+
     serializer_class = PointSerializer
     permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
     queryset = Point.objects.all()
     lookup_field = "id"
-    
-    
+
+
 class MessageRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    """
+    Получение, обновление и удаление сообщения
+    """
+
     serializer_class = MessageSerializer
     permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
     queryset = Message.objects.all()
@@ -50,10 +91,23 @@ class MessageRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
 
 
 class PointSearchView(GenericAPIView):
+    """
+    Поиск гео-точек и сообщений в заданном радиусе от координат
+    """
+
     serializer_class = PointSerializer
     queryset = Point.objects.all()
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """
+        Возвращает гео-точки, находящиеся в пределах заданного радиуса
+
+        Query-параметры:
+            latitude: Широта точки поиска
+            longitude: Долгота точки поиска
+            radius: Радиус поиска в километрах
+        """
+
         try:
             lat = float(request.query_params["latitude"])
             lon = float(request.query_params["longitude"])
@@ -64,7 +118,20 @@ class PointSearchView(GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        def haversine(lat1, lon1, lat2, lon2):
+        def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+            """
+            Вычисляет расстояние между двумя гео-точками по формуле гаверсинусов
+
+            Args:
+                lat1: Широта первой точки
+                lon1: Долгота первой точки
+                lat2: Широта второй точки
+                lon2: Долгота второй точки
+
+            Returns:
+                Расстояние между точками в километрах
+            """
+
             lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
             dlat = lat2 - lat1
             dlon = lon2 - lon1

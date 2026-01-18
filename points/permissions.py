@@ -12,9 +12,11 @@ class IsOwnerOrReadOnly(BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
+        """Проверка наличия прав доступа для управления точками и сообщенями"""
+
         if request.method in SAFE_METHODS:
             return True
-        
+
         if hasattr(obj, "creator"):
             return obj.creator == request.user
         if hasattr(obj, "author"):

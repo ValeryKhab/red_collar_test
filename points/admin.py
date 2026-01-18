@@ -27,8 +27,11 @@ class PointAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
-    search_fields = ("name", "description",)
-    
+    search_fields = (
+        "name",
+        "description",
+    )
+
 
 @admin.register(Message)
 class MessageUserAdmin(admin.ModelAdmin):

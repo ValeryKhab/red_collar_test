@@ -1,5 +1,5 @@
 """
-Модели
+Модель пользователя
 """
 
 from django.contrib.auth import get_user_model
