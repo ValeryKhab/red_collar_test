@@ -84,7 +84,6 @@ class LogoutView(GenericAPIView):
         """
 
         if hasattr(request.user, "auth_token"):
-            print(request.user.auth_token)
             request.user.auth_token.delete()  # удаляем токен
         logout(request)  # разлогиниваем из сессии
         return Response({"detail": "Logged out"}, status=status.HTTP_200_OK)
